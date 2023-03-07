@@ -14,8 +14,8 @@ import { Offer } from './entities/offer.entity';
 export class OffersService {
   constructor(
     @InjectRepository(Offer)
-    private readonly wishesService: WishesService,
     private readonly offersRepository: Repository<Offer>,
+    private readonly wishesService: WishesService,
   ) {}
 
   async findOneById(id: number): Promise<Offer> {
