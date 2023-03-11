@@ -15,10 +15,13 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { Wish } from './entities/wish.entity';
 import { WishesService } from './wishes.service';
 
+import { UseInterceptors } from '@nestjs/common/decorators';
+import { ClassSerializerInterceptor } from '@nestjs/common/serializer';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 
 @Controller('wishes')
+@UseInterceptors(ClassSerializerInterceptor)
 export class WishesController {
   constructor(private readonly wishesService: WishesService) {}
 
@@ -54,7 +57,8 @@ export class WishesController {
     const wish = await this.wishesService.findOneById(id);
     if (req.user.id !== wish.owner.id)
       throw new ForbiddenException('Ошибка доступа');
-    return await this.wishesService.update(id, updateWishDto);
+    await this.wishesService.update(id, updateWishDto);
+    return this.wishesService.findOneById(id);
   }
 
   @UseGuards(JwtGuard)
@@ -64,6 +68,6 @@ export class WishesController {
     if (req.user.id !== wish.owner.id)
       throw new ForbiddenException('Ошибка доступа');
     await this.wishesService.remove(id);
-    return wish;
+    return;
   }
 }

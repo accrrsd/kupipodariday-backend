@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   NotFoundException,
@@ -7,6 +8,7 @@ import {
   Post,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 
 import { CreateOfferDto } from './dto/create-offer.dto';
@@ -17,6 +19,7 @@ import { Offer } from './entities/offer.entity';
 
 @UseGuards(JwtGuard)
 @Controller('offers')
+@UseInterceptors(ClassSerializerInterceptor)
 export class OffersController {
   constructor(private readonly offersService: OffersService) {}
 

@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   NotFoundException,
@@ -10,7 +11,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { UpdateResult } from 'typeorm';
 
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { TransformInterceptor } from '../utils/transform.interceptor';
@@ -22,6 +22,7 @@ import { UsersService } from './users.service';
 
 @UseGuards(JwtGuard)
 @Controller('users')
+@UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
   constructor(
     private readonly wishesService: WishesService,
@@ -57,8 +58,9 @@ export class UsersController {
   async updateMyUser(
     @Req() req,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<UpdateResult> {
-    return this.usersService.update(req.user.id, updateUserDto);
+  ): Promise<User> {
+    await this.usersService.update(req.user.id, updateUserDto);
+    return this.usersService.findOneById(req.user.id);
   }
 
   @UseInterceptors(TransformInterceptor)

@@ -42,7 +42,15 @@ export class WishlistsService {
   }
 
   async update(id: number, updateWishlistDto: UpdateWishlistDto) {
-    return this.wishlistsRepository.update(id, updateWishlistDto);
+    const { itemsId, ...rest } = updateWishlistDto;
+    const wishes = itemsId.map((id: number) => ({ id } as Wish));
+
+    const newWishlistContent = {
+      ...rest,
+      items: wishes,
+    };
+
+    return this.wishlistsRepository.update(id, newWishlistContent);
   }
 
   async remove(id: number) {

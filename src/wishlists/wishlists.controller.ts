@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -24,6 +25,7 @@ import { Wishlist } from './entities/wishlist.entity';
 import { WishlistsService } from './wishlists.service';
 
 @Controller('wishlistlists')
+@UseInterceptors(ClassSerializerInterceptor)
 export class WishlistsController {
   constructor(private readonly wishlistsService: WishlistsService) {}
 
@@ -50,11 +52,12 @@ export class WishlistsController {
 
   @UseGuards(JwtGuard)
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: number,
     @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
-    return this.wishlistsService.update(id, updateWishlistDto);
+    await this.wishlistsService.update(id, updateWishlistDto);
+    return this.wishlistsService.findOneById(id);
   }
 
   @UseGuards(JwtGuard)
