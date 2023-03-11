@@ -23,6 +23,11 @@ import { Offer } from './entities/offer.entity';
 export class OffersController {
   constructor(private readonly offersService: OffersService) {}
 
+  @Post()
+  async create(@Req() req, @Body() createOfferDto: CreateOfferDto) {
+    return this.offersService.create(req.user, createOfferDto);
+  }
+
   @Get()
   findAll() {
     return this.offersService.findAll();
@@ -33,10 +38,5 @@ export class OffersController {
     const offer = await this.offersService.findOneById(id);
     if (!offer) throw new NotFoundException('Не найдено');
     return offer;
-  }
-
-  @Post()
-  async create(@Req() req, @Body() createOfferDto: CreateOfferDto) {
-    return this.offersService.create(req.user, createOfferDto);
   }
 }

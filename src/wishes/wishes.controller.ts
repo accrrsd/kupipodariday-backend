@@ -25,9 +25,11 @@ import { UpdateWishDto } from './dto/update-wish.dto';
 export class WishesController {
   constructor(private readonly wishesService: WishesService) {}
 
-  @Get('top')
-  async findTopWishes(): Promise<Wish[]> {
-    return await this.wishesService.findTopWishes();
+  @UseGuards(JwtGuard)
+  @Post()
+  create(@Req() req, @Body() createWishDto: CreateWishDto): Promise<Wish> {
+    this.wishesService.create(req.user, createWishDto);
+    return;
   }
 
   @Get('last')
@@ -35,10 +37,9 @@ export class WishesController {
     return await this.wishesService.findLastWishes();
   }
 
-  @UseGuards(JwtGuard)
-  @Post()
-  create(@Req() req, @Body() createWishDto: CreateWishDto): Promise<Wish> {
-    return this.wishesService.create(req.user, createWishDto);
+  @Get('top')
+  async findTopWishes(): Promise<Wish[]> {
+    return await this.wishesService.findTopWishes();
   }
 
   @UseGuards(JwtGuard)
@@ -55,19 +56,28 @@ export class WishesController {
     @Body() updateWishDto: UpdateWishDto,
   ) {
     const wish = await this.wishesService.findOneById(id);
+
     if (req.user.id !== wish.owner.id)
       throw new ForbiddenException('Ошибка доступа');
     await this.wishesService.update(id, updateWishDto);
-    return this.wishesService.findOneById(id);
+    return;
   }
 
   @UseGuards(JwtGuard)
   @Delete(':id')
   async deleteWish(@Req() req, @Param('id') id: number): Promise<Wish> {
     const wish = await this.wishesService.findOneById(id);
+
     if (req.user.id !== wish.owner.id)
       throw new ForbiddenException('Ошибка доступа');
     await this.wishesService.remove(id);
+    return wish;
+  }
+
+  @UseGuards(JwtGuard)
+  @Post(':id/copy')
+  async copyWish(@Param('id') id: number): Promise<Wish> {
+    await this.wishesService.copy(id);
     return;
   }
 }

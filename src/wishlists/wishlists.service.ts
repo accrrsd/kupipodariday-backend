@@ -6,6 +6,10 @@ import { User } from 'src/users/entities/user.entity';
 import { Wish } from '../wishes/entities/wish.entity';
 import { Wishlist } from './entities/wishlist.entity';
 
+import {
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common/exceptions';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 
@@ -41,16 +45,25 @@ export class WishlistsService {
     });
   }
 
-  async update(id: number, updateWishlistDto: UpdateWishlistDto) {
+  async update(user: User, id: number, updateWishlistDto: UpdateWishlistDto) {
+    const currentWishlist = await this.findOneById(id);
+
+    if (!currentWishlist) throw new NotFoundException('Не найдено');
+
+    if (currentWishlist.owner.id !== user.id)
+      throw new ForbiddenException('Ошибка доступа');
+
     const { itemsId, ...rest } = updateWishlistDto;
     const wishes = itemsId.map((id: number) => ({ id } as Wish));
 
-    const newWishlistContent = {
+    const updatingWishlist: Wishlist = {
+      ...currentWishlist,
       ...rest,
       items: wishes,
+      updatedAt: new Date(),
     };
 
-    return this.wishlistsRepository.update(id, newWishlistContent);
+    return this.wishlistsRepository.save(updatingWishlist);
   }
 
   async remove(id: number) {

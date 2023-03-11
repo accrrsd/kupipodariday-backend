@@ -35,6 +35,16 @@ export class UsersController {
     return this.usersService.findOneById(req.user.id);
   }
 
+  @UseGuards(JwtGuard)
+  @Patch('me')
+  async updateMyUser(
+    @Req() req,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    await this.usersService.update(req.user.id, updateUserDto);
+    return this.usersService.findOneById(req.user.id);
+  }
+
   @Get('me/wishes')
   async getMyWishes(@Req() req): Promise<Wish[]> {
     return this.wishesService.findManyByOwner(req.user.id);
@@ -51,16 +61,6 @@ export class UsersController {
   async findWishesByUserName(@Param('username') username: string) {
     const user = await this.usersService.findOneByUsername(username);
     return await this.wishesService.findManyByOwner(user.id);
-  }
-
-  @UseGuards(JwtGuard)
-  @Patch('me')
-  async updateMyUser(
-    @Req() req,
-    @Body() updateUserDto: UpdateUserDto,
-  ): Promise<User> {
-    await this.usersService.update(req.user.id, updateUserDto);
-    return this.usersService.findOneById(req.user.id);
   }
 
   @UseInterceptors(TransformInterceptor)

@@ -26,16 +26,38 @@ export class WishesService {
 
   async findTopWishes(): Promise<Wish[]> {
     return this.wishesRepository.find({
-      order: { copied: 'DESC' },
-      take: 10,
+      order: { createdAt: 1 },
+      take: 1,
+      relations: ['owner', 'offers'],
     });
   }
 
   async findLastWishes(): Promise<Wish[]> {
     return this.wishesRepository.find({
-      order: { createdAt: 'DESC' },
-      take: 40,
+      order: { createdAt: -1 },
+      take: 1,
+      relations: ['owner', 'offers'],
     });
+  }
+
+  async copy(id: number) {
+    const wish = await this.wishesRepository.findOneBy({ id });
+    if (!wish) throw new NotFoundException('Подарок не найден');
+
+    await this.wishesRepository.update(id, {
+      copied: (wish.copied += 1),
+    });
+
+    const { createdAt, updatedAt, ...restWish } = wish;
+
+    const wishCopy = {
+      ...restWish,
+      copied: 0,
+      raised: 0,
+      offers: [],
+    };
+
+    return await this.create(wish.owner, wishCopy);
   }
 
   async create(user: User, createWishDto: CreateWishDto) {

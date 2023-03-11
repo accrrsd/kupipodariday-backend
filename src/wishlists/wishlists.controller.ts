@@ -55,14 +55,17 @@ export class WishlistsController {
   async update(
     @Param('id') id: number,
     @Body() updateWishlistDto: UpdateWishlistDto,
+    @Req() req,
   ) {
-    await this.wishlistsService.update(id, updateWishlistDto);
+    await this.wishlistsService.update(req.user, id, updateWishlistDto);
     return this.wishlistsService.findOneById(id);
   }
 
   @UseGuards(JwtGuard)
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.wishlistsService.remove(id);
+  async remove(@Param('id') id: number) {
+    const deletedWish = await this.wishlistsService.findOneById(id);
+    await this.wishlistsService.remove(id);
+    return deletedWish;
   }
 }
