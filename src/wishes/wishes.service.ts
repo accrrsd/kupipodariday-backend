@@ -48,7 +48,7 @@ export class WishesService {
       copied: (wish.copied += 1),
     });
 
-    const { createdAt, updatedAt, ...restWish } = wish;
+    const { createdAt, updatedAt, id: junkId, ...restWish } = wish;
 
     const wishCopy = {
       ...restWish,
